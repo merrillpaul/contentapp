@@ -51,8 +51,8 @@
     "plugins": {
       "cordova-plugin-ionic": {
         "APP_ID": "fc1e6e2b",
-        "CHANNEL_NAME": "Master",
-        "UPDATE_METHOD": "none"
+        "CHANNEL_NAME": "Production",
+        "UPDATE_METHOD": "auto"
       },
       "cordova-plugin-whitelist": {},
       "cordova-plugin-device": {},
