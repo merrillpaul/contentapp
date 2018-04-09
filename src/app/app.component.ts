@@ -65,6 +65,7 @@ export class MyApp {
     try {
       const res = await Pro.deploy.info();
       console.log(`check channel ${res.channel}`);
+      Pro.monitoring.log(`A new change came in with ${res.binary_version}`, {level: 'info'} );
       Pro.monitoring.log(`check channel ${res.channel}`, {level: 'info'} );
     } catch (err) {
       // We encountered an error.
