@@ -7,6 +7,8 @@ import { Config, Nav, Platform } from 'ionic-angular';
 import { FirstRunPage } from '../pages/pages';
 import { Settings } from '../providers/providers';
 
+import { Pro } from '@ionic/pro';
+
 @Component({
   template: `<ion-menu [content]="content">
     <ion-header>
@@ -46,6 +48,7 @@ export class MyApp {
   ]
 
   constructor(private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+    this.checkChannel();
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
@@ -53,8 +56,24 @@ export class MyApp {
       this.splashScreen.hide();
     });
     this.initTranslate();
+
+    
   }
 
+
+  async checkChannel() {
+    try {
+      const res = await Pro.deploy.info();
+      Pro.monitoring.log(`check channel ${res.channel}`, {level: 'info'} );
+    } catch (err) {
+      // We encountered an error.
+      // Here's how we would log it to Ionic Pro Monitoring while also catching:
+
+      Pro.monitoring.exception(err);
+    }
+  }
+
+  
   initTranslate() {
     // Set the default language for translation strings, and the current language.
     this.translate.setDefaultLang('en');
