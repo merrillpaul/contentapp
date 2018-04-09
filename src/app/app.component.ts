@@ -7,7 +7,14 @@ import { Config, Nav, Platform } from 'ionic-angular';
 import { FirstRunPage } from '../pages/pages';
 import { Settings } from '../providers/providers';
 
-import { Pro } from '@ionic/pro';
+import { Pro, DeployConfig } from '@ionic/pro';
+import { HttpClient } from '@angular/common/http';
+
+const TESTS = [
+  'cms',
+  'gfta2',
+  'wiat3'
+];
 
 @Component({
   template: `<ion-menu [content]="content">
@@ -47,8 +54,11 @@ export class MyApp {
     { title: 'Search', component: 'SearchPage' }
   ]
 
-  constructor(private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
-    this.checkChannel();
+  constructor(private translate: TranslateService, platform: Platform, settings: Settings, 
+    private http: HttpClient,
+    private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+     
+    
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
@@ -56,10 +66,36 @@ export class MyApp {
       this.splashScreen.hide();
     });
     this.initTranslate();
-
+    this.updateContentIfAny();
     
   }
 
+
+  async updateContentIfAny() {
+    try {
+      this.checkChannel();
+      const initialConfig: DeployConfig =  await Pro.deploy.info();
+      debugger;
+      try {
+      await Pro.deploy.init({
+        channel: 'Master',
+        appId: initialConfig.appId
+      });
+      await this.performManualUpdate();
+      await this.checkChannel();
+      } catch (e) {
+        
+      } 
+
+      // resetting to original config
+      await Pro.deploy.init(initialConfig);
+    } catch(e) {
+
+    } 
+    this.logTestJson();
+    
+    
+  }
 
   async checkChannel() {
     try {
@@ -71,7 +107,57 @@ export class MyApp {
       // We encountered an error.
       // Here's how we would log it to Ionic Pro Monitoring while also catching:
 
-      Pro.monitoring.exception(err);
+      // Pro.monitoring.exception(err);
+    }    
+  }
+
+  async performManualUpdate() {
+
+    /*
+      Here we are going through each manual step of the update process:
+      Check, Download, Extract, and Redirect.
+      This code is currently exactly the same as performAutomaticUpdate,
+      but you could split it out to customize the flow.
+
+      Ex: Check, Download, Extract when a user logs into your app,
+        but Redirect when they logout for an app that is always running
+        but used with multiple users (like at a doctors office).
+    */
+
+    try {
+      const haveUpdate = await Pro.deploy.check();
+
+      if (haveUpdate){
+        
+
+        await Pro.deploy.download((progress) => {
+          // this.downloadProgress = progress;
+        })
+        await Pro.deploy.extract();
+        await Pro.deploy.redirect();
+      }
+    } catch (err) {
+      // We encountered an error.
+      // Here's how we would log it to Ionic Pro Monitoring while also catching:
+
+      // Pro.monitoring.exception(err);
+    }
+
+  }
+
+
+
+
+  async logTestJson() {
+    for (let test of TESTS) {
+      try {
+        let json = await this.http.get(`assets/battery/${test}/${test}.json`).toPromise();
+        console.log(` Got JSON for ${test} is ${JSON.stringify(json, null, 5)}`);
+        Pro.monitoring.log(`Got JSON for ${test} with ${JSON.stringify(json, null, 5)}`, {level: 'info'} );
+      } catch (e) {
+        console.log(`didnt get json for ${test}`);
+        Pro.monitoring.log(`didnt get json for ${test}`, { level: 'warn'});
+      }
     }
   }
 
