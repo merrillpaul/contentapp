@@ -49,16 +49,16 @@
   "description": "An Ionic project",
   "cordova": {
     "plugins": {
-      "cordova-plugin-ionic": {
-        "APP_ID": "fc1e6e2b",
-        "CHANNEL_NAME": "Production",
-        "UPDATE_METHOD": "auto"
-      },
       "cordova-plugin-whitelist": {},
       "cordova-plugin-device": {},
       "cordova-plugin-splashscreen": {},
       "cordova-plugin-ionic-webview": {},
-      "cordova-plugin-ionic-keyboard": {}
+      "cordova-plugin-ionic-keyboard": {},
+      "cordova-plugin-ionic": {
+        "APP_ID": "fc1e6e2b",
+        "CHANNEL_NAME": "Production",
+        "UPDATE_METHOD": "auto"
+      }
     },
     "platforms": [
       "ios"

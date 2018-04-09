@@ -64,6 +64,7 @@ export class MyApp {
   async checkChannel() {
     try {
       const res = await Pro.deploy.info();
+      console.log(`check channel ${res.channel}`);
       Pro.monitoring.log(`check channel ${res.channel}`, {level: 'info'} );
     } catch (err) {
       // We encountered an error.
