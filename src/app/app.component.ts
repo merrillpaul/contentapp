@@ -66,8 +66,8 @@ export class MyApp {
       this.splashScreen.hide();
     });
     this.initTranslate();
-    this.updateContentIfAny();
-    
+    //this.updateContentIfAny();
+    this.logTestJson();
   }
 
 
