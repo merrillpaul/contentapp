@@ -28,6 +28,7 @@ without duplicating code.
 2. [Pages](#pages)
 3. [Providers](#providers)
 4. [i18n](#i18n) (adding languages)
+5. [Content Update](#content-update)
 
 ## <a name="getting-started"></a>Getting Started
 
@@ -94,3 +95,47 @@ code (ex: en/gb/de/es/etc.).
 
 To change the language of the app, edit `src/app/app.component.ts` and modify
 `translate.use('en')` to use the LANGCODE from `src/assets/i18n/`
+
+## <a name="content-update"></a>Update content
+Content update refers to updating the battery folder.
+Non content update is for the app ( typescript/ng src).
+
+### Content update using sibling channels  
+For each branch/channel we will setup a sibling channel.
+For eg `prod` and `Production` branch and channel will have `prod_content` and `Production_Content` branch and channel.
+
+#### Initial setup 
+- Initial app is built from `prod` and deployed to `Production` channel. This does not contain the battery folder
+- The app is configured to update automatically (`auto`) using the `Production` channel. These assets are downloaded and extracted when app starts up for the first time and subsequently
+- The `prod_content` and `Production_Content` channel is a copy of the `prod` , only additionally with the `battery` folder within the `assets`.
+- The app on login does a manual check and extract from the `Production_Channel` and extracts the battery folder.
+
+
+#### Content only change
+This is if there is change only in the battery folder. 
+- No need to deploy the `prod` and `Production` channel
+- Add the change into the `prod_content` branch and then `git` commit using `git push origin prod_content`
+- Start an ionic build on the `Production_Channel` using `git push ionic prod_content`. Wait for the build to complete.
+- Deploy these changes to the `Production_Channel`.
+- Next login on the app downloads the latest battery folder from the `Production_Channel` manually as before.
+
+#### App change
+This is if there is change in the Ionic APP ( TS, local assets etc)
+- Make these changes in the `prod` branch and `git push origin prod`
+- Merge these changes into the `prod_content` branch and `git push origin prod_content`
+- Start an Ionic build for both using `git push ionic prod` and `git push ionic prod_content`. Wait for them to complete
+- Deploy changes respectively to `Production` and `Production_Content` channel
+- Next login pulls in app changes from `Production` and latest content  from `Production_Channel`
+
+Note: The reason to keep app changes in sync with both sibling branches is that, during the manual content update after login, even though the extraction process extracts to a different location, the Ionic app only loads the new extracted app folder.
+
+#### Both App and Content change.
+- Make app changes in both `prod` and `prod_content` branch.
+- Add content change only in `prod_content` branch,
+- Commit these changes: ``git push origin prod` and `git push ionic prod_content`
+- Start an Ionic build for both using `git push ionic prod` and `git push ionic prod_content`. Wait for them to complete
+- Deploy changes respectively to `Production` and `Production_Content` channel
+- Next login pulls in app changes from `Production` and updated content  from `Production_Channel`
+
+```bash
+ionic start mySuperApp super
